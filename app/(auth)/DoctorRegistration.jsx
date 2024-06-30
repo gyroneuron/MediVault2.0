@@ -46,59 +46,43 @@ const DoctorRegistration = () => {
   const [certificateDoc, setCertificateDoc] = useState(null);
 
   const handleDoctorRegister = async () => {
-    const idFileUpload = await supabase.storage
-      .from("documents")
-      .upload(`ids/${Date.now()}_${idDoc}`, idDoc);
-    const certFileUpload = await supabase.storage
-      .from("documents")
-      .upload(`certs/${Date.now()}_${certificate.name}`, certificate);
-
-    if (idFileUpload.error || certFileUpload.error) {
-      console.error("File upload failed");
-      return;
+    if ((!fullName || !email || !password || confirmPassword!=password || !licenseNumber || !idDoc || !certificate)){
+      Alert.alert('Enter all the field to register');
+      return
     }
+    
+    try {
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            fullName: fullName,
+          }
+        }
+      })
 
-    const { user, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          license_number: licenseNumber,
-          id_url: idFileUpload.data.path,
-          cert_url: certFileUpload.data.path,
-          role: "doctor",
-          verified: false, // Initial verification status is false
-        },
-      },
-    });
-
-    if (error) {
-      console.error("Error signing up:", error.message);
-    } else {
-      const { error: insertError } = await supabase.from("profiles").insert([
-        {
-          id: user.id,
-          full_name: fullName,
-          email,
-          license_number: licenseNumber,
-          id_url: idFileUpload.data.path,
-          cert_url: certFileUpload.data.path,
-          role: "doctor",
-          verified: false,
-        },
-      ]);
-
-      if (insertError) {
-        console.error(
-          "Error inserting into profiles table:",
-          insertError.message
-        );
+      if (signupError) {
+        console.log(signupError);
       } else {
-        console.log("Doctor registered successfully!");
+          const {error: userUploadError} = await supabase
+            .from('profiles')
+            .insert([{ id: data.user.id, full_name: fullName, email, role: "doctor", id_url: idDoc, license: licenseNumber, certificate_url: certificate }]);
+
+          if (userUploadError) {
+            console.log(userUploadError)
+          } else {
+            Alert.alert('Success', 'Signed up Successfully!!');
+            router.navigate('UserLogin')
+          }
       }
+        
+    } catch (error) {
+      console.log(error)
     }
-  };
+  }
+
+
 
   //Picking Doctor Document
   const pickDoc = async (set, setStatus) => {

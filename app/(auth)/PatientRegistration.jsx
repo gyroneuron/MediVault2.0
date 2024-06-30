@@ -14,10 +14,10 @@ import React, { useEffect, useState } from "react";
 import Logo from "../../assets/images/Auth/Registration.png";
 import CustomButton from "../../components/CustomButton";
 import { router } from "expo-router";
-import {supabase} from '../../lib/supabase';
+import { supabase } from "../../lib/supabase";
 
 const PatientRegistration = () => {
-  const [fullName, setFullName] = useState('');
+  const [fullName, setFullName] = useState("");
   const [isValidName, setIsValidName] = useState(true);
   const [isNameTyping, setIsNameTyping] = useState(false);
   const [email, setEmail] = useState("");
@@ -26,52 +26,47 @@ const PatientRegistration = () => {
   const [password, setPassword] = useState("");
   const [isvalidPassword, setIsValidPassword] = useState(true);
   const [ispasswordtyping, setIsPasswordTyping] = useState(false);
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isValidconfirmPassword, setIsValidConfirmPassword] = useState(true)
-  const [isConfirmPassTyping, setIsConfirmPassTyping] = useState(false)
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isValidconfirmPassword, setIsValidConfirmPassword] = useState(true);
+  const [isConfirmPassTyping, setIsConfirmPassTyping] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
+    useState(false);
 
-  const handleSignup = async () => {
-    try {
-      setIsSubmitting(true);
-      if (isValidName && isValidEmail && isValidconfirmPassword && isValidconfirmPassword) {
-        const { user, error } = await supabase.auth.signUp({
-          email: email,
-          password: password,
-        });
-        if (error) {
-          Alert.alert("Error", error.message);
-        } else {
-          const { error: insertError } = await supabase
-            .from("profiles")
-            .insert([
-              {
-                full_name: fullName,
-                email: email,
-                role: "patient",
-              },
-            ]);
-          if (insertError) {
-            Alert.alert("Error", insertError.message);
-          } else {
-            Alert.alert("Success", "Patient registered successfully!");
+    const handleRegister = async () => {
+      try {
+        const { data, error: signupError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              fullName: fullName,
+            }
           }
+        })
+
+        if (signupError) {
+          console.log(signupError);
+        } else {
+            const {error: userUploadError} = await supabase
+              .from('profiles')
+              .insert([{ id: data.user.id, full_name: fullName, email, role: "patient" }]);
+
+            if (userUploadError) {
+              console.log(userUploadError)
+            } else {
+              Alert.alert('Success', 'Signed up Successfully!!');
+              router.navigate('UserLogin')
+            }
         }
-      } else {
-        Alert.alert("Error", "Please enter valid details");
+          
+      } catch (error) {
+        console.log(error)
       }
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-
-  //Validating Email
+    };
+    
 
   useEffect(() => {
     const validateEmail = (email) => {
@@ -82,18 +77,21 @@ const PatientRegistration = () => {
     setIsValidEmail(validateEmail(email));
   }, [email]);
 
-
   //Validating Full name
 
   useEffect(() => {
     const validateFullName = (fullName) => {
       const regex = /^[A-Za-z\s]+$/;
-  
+
       const minLength = 8;
       const maxLength = 50;
-  
-      return regex.test(fullName) && fullName.length >= minLength && fullName.length <= maxLength;
-  }
+
+      return (
+        regex.test(fullName) &&
+        fullName.length >= minLength &&
+        fullName.length <= maxLength
+      );
+    };
 
     setIsValidName(validateFullName(fullName));
   }, [fullName]);
@@ -107,16 +105,14 @@ const PatientRegistration = () => {
     setIsValidPassword(validatePassword(password));
   }, [password]);
 
-
   //Validating Confirm password
   useEffect(() => {
     const validateConfirmPass = (confirmPassword) => {
-      return password === confirmPassword
-    }
+      return password === confirmPassword;
+    };
 
-    setIsValidConfirmPassword(validateConfirmPass(confirmPassword))
-  }, [confirmPassword])
-
+    setIsValidConfirmPassword(validateConfirmPass(confirmPassword));
+  }, [confirmPassword]);
 
   return (
     <SafeAreaView className="w-full h-full bg-[#001524] items-center justify-center">
@@ -138,7 +134,9 @@ const PatientRegistration = () => {
           </View>
 
           <View className="flex-1 w-full">
-          <Text className="text-white text-base my-3 self-start">Full Name</Text>
+            <Text className="text-white text-base my-3 self-start">
+              Full Name
+            </Text>
             <View className="rounded-2xl  border-2 border-slate-800 bg-slate-800 h-16 w-full items-center justify-center focus:border-[#0D6EFD]">
               <TextInput
                 className="w-full h-full text-base px-4 text-[#ffffff]"
@@ -148,7 +146,7 @@ const PatientRegistration = () => {
                   setIsNameTyping(true);
                 }}
                 placeholder="Enter full name"
-                placeholderTextColor={'grey'}
+                placeholderTextColor={"grey"}
                 keyboardType="email-address"
                 cursorColor={"#FF8E01"}
               />
@@ -168,7 +166,7 @@ const PatientRegistration = () => {
                   setIsEmailTyping(true);
                 }}
                 placeholder="Enter email address"
-                placeholderTextColor={'grey'}
+                placeholderTextColor={"grey"}
                 keyboardType="email-address"
                 cursorColor={"#FF8E01"}
               />
@@ -190,7 +188,7 @@ const PatientRegistration = () => {
                   setIsPasswordTyping(true);
                 }}
                 placeholder="Enter password"
-                placeholderTextColor={'grey'}
+                placeholderTextColor={"grey"}
                 keyboardType="default"
                 cursorColor={"#FF8E01"}
                 secureTextEntry={!isPasswordVisible}
@@ -228,20 +226,24 @@ const PatientRegistration = () => {
                   setIsConfirmPassTyping(true);
                 }}
                 placeholder="Enter confirm password"
-                placeholderTextColor={'grey'}
+                placeholderTextColor={"grey"}
                 keyboardType="default"
                 cursorColor={"#FF8E01"}
                 secureTextEntry={!isConfirmPasswordVisible}
               />
               {isConfirmPasswordVisible ? (
-                <TouchableOpacity onPress={() => setIsConfirmPasswordVisible(false)}>
+                <TouchableOpacity
+                  onPress={() => setIsConfirmPasswordVisible(false)}
+                >
                   <Image
                     source={require("../../assets/icons/eye.png")}
                     className=" h-5 w-5"
                   />
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity onPress={() => setIsConfirmPasswordVisible(true)}>
+                <TouchableOpacity
+                  onPress={() => setIsConfirmPasswordVisible(true)}
+                >
                   <Image
                     source={require("../../assets/icons/eye-hide.png")}
                     className=" h-5 w-5"
@@ -256,7 +258,7 @@ const PatientRegistration = () => {
             ) : null}
             <CustomButton
               name={"Register"}
-              handlePress={handleSignup}
+              handlePress={handleRegister}
               textstyle={"font-pbold text-base text-white"}
               submittingStatus={isSubmitting}
             />
@@ -264,10 +266,11 @@ const PatientRegistration = () => {
               <Text className="font-pmedium text-light-text">
                 Already have an account?
               </Text>
-              <TouchableOpacity
-                onPress={() => router.navigate("UserLogin")}
-              >
-                <Text className="text-secondary-200 font-pmedium text-dark-text"> Login</Text>
+              <TouchableOpacity onPress={() => router.navigate("UserLogin")}>
+                <Text className="text-secondary-200 font-pmedium text-dark-text">
+                  {" "}
+                  Login
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -279,14 +282,13 @@ const PatientRegistration = () => {
 
 export default PatientRegistration;
 
-
 // if (error) {
 //   console.log('Error signing up:', error.message);
 // } else {
 //   const { error: insertError } = await supabase
 //     .from('profiles')
-//     .insert([{ 
-//       id: user.id, 
+//     .insert([{
+//       id: user.id,
 //       full_name: fullName,
 //       email: email,
 //       role: 'patient'

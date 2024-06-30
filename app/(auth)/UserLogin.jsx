@@ -35,13 +35,29 @@ const UserLogin = () => {
       }
       setIsSubmitting(true);
 
-      const user = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
       });
-      console.log('User Logged in Successfully!')
-      console.log(user)
 
+      if(error) {
+        Alert.alert(error.name, error.message)
+      } else {
+        const {data: profile, error: profileFetchError} = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single()
+
+          if (profileFetchError) {
+            Alert.alert(profileFetchError.message)
+          } else {
+            router.replace({
+              pathname: '/(tabs)/home',
+              params: profile
+            })
+          }
+      }
     } catch (error) {
       console.log('Error:', error)
     }

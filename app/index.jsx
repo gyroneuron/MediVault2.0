@@ -10,7 +10,7 @@ const StartScreen = () => {
   }
   return (
     <View className="flex-1">
-      <StatusBar hidden/>
+      <StatusBar barStyle={'light-content'}/>
         <ImageBackground source={require('../assets/images/background.jpg')} resizeMode='cover' className="flex-1 justify-end">
           <View className="flex-[0.65] w-full items-center justify-center">
             <Image resizeMode='contain' source={Logo} className="h-[50%] w-[50%]"/>

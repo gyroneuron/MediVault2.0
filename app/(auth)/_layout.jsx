@@ -8,6 +8,9 @@ const _layout = () => {
         <Stack.Screen name='UserSelection' options={{
           headerShown: false
         }}/>
+        <Stack.Screen name='ForgotPassword' options={{
+          headerShown: false
+        }}/>
         <Stack.Screen name='DoctorRegistration' options={{
           headerShown: false
         }}/>
@@ -15,6 +18,9 @@ const _layout = () => {
           headerShown: false
         }}/>
         <Stack.Screen name='AdminLogin' options={{
+          headerShown: false
+        }}/>
+        <Stack.Screen name='AdminDashboard' options={{
           headerShown: false
         }}/>
         <Stack.Screen name='UserLogin' options={{

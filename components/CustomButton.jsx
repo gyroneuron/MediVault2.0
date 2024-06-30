@@ -9,11 +9,12 @@ const CustomButton = ({
   handlePress,
   image,
   submittingStatus,
+  buttonStyles
 }) => {
   return (
     <TouchableOpacity
       onPress={handlePress}
-      className={`w-full min-h-[62px] rounded-2xl flex-row my-10 bg-[#0D6EFD] items-center justify-center ${
+      className={`w-full min-h-[62px] rounded-2xl flex-row my-10 bg-[#0D6EFD] items-center justify-center ${buttonStyles} ${
         submittingStatus ? "opacity-50" : "opacity-100"
       }`}
     >
