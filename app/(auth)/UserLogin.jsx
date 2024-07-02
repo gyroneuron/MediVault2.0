@@ -37,29 +37,29 @@ const UserLogin = () => {
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password
+        password,
       });
 
-      if(error) {
-        Alert.alert(error.name, error.message)
+      if (error) {
+        Alert.alert(error.name, error.message);
       } else {
-        const {data: profile, error: profileFetchError} = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', data.user.id)
-          .single()
+        const { data: profile, error: profileFetchError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", data.user.id)
+          .single();
 
-          if (profileFetchError) {
-            Alert.alert(profileFetchError.message)
-          } else {
-            router.replace({
-              pathname: '/(tabs)/home',
-              params: profile
-            })
-          }
+        if (profileFetchError) {
+          Alert.alert(profileFetchError.message);
+        } else {
+          router.replace({
+            pathname: "/(tabs)/home",
+            params: profile,
+          });
+        }
       }
     } catch (error) {
-      console.log('Error:', error)
+      console.log("Error:", error);
     }
   };
 
@@ -81,9 +81,9 @@ const UserLogin = () => {
   }, [password]);
 
   return (
-    <SafeAreaView className="w-full h-full bg-[#001524] items-center justify-center">
+    <SafeAreaView className="w-full h-full bg-dark-background items-center justify-center">
       <StatusBar barStyle={"light-content"} />
-      <View className="justify-center items-center flex-1 w-[90%] h-full bg-[#001524]">
+      <View className="justify-center items-center flex-1 w-[90%] h-full bg-dark-background">
         <KeyboardAvoidingView
           className="w-full flex-1 h-full items-center justify-center"
           behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -94,14 +94,14 @@ const UserLogin = () => {
               resizeMode="contain"
               className=" h-60 w-full self-center my-10"
             />
-            <Text className=" font-pbold text-center text-[#ffffff] text-2xl">
-              Login
-            </Text>
           </View>
 
-          <View className="flex-1 w-full">
-            <Text className="text-white text-base my-3 self-start">Email</Text>
-            <View className="rounded-2xl  border-2 border-slate-800 bg-slate-800 h-16 w-full items-center justify-center focus:border-[#0D6EFD]">
+          <View className="flex-[1.2] w-full bg-[#27272A] p-3 rounded-3xl">
+            <Text className=" font-pbold text-center text-dark-elevatedCard-label text-2xl my-3">
+              Login
+            </Text>
+            <Text className="text-dark-elevatedCard-label text-base my-3 self-start">Email</Text>
+            <View className="rounded-2xl  border-2 border-zinc-700 bg-zinc-700 h-16 w-full items-center justify-center focus:border-zinc-300">
               <TextInput
                 className="w-full h-full text-base px-4 text-[#ffffff]"
                 value={email}
@@ -121,7 +121,7 @@ const UserLogin = () => {
             <Text className="text-white self-start text-base my-3">
               Password
             </Text>
-            <View className="rounded-2xl border-slate-800 flex-row bg-slate-800 h-16 w-full items-center justify-evenly focus:border-[#0D6EFD]">
+            <View className="rounded-2xl border-zinc-700 flex-row bg-zinc-700 h-16 w-full items-center justify-evenly focus:border-zinc-300">
               <TextInput
                 className="w-[90%] h-full text-base px-4 text-[#E7DECD]"
                 value={password}
@@ -164,7 +164,11 @@ const UserLogin = () => {
                 onPress={() => router.navigate("AdminLogin")}
                 className="flex-row items-center justify-center"
               >
-                <MaterialCommunityIcons name="security" color={'white'} size={20}/>
+                <MaterialCommunityIcons
+                  name="security"
+                  color={"white"}
+                  size={20}
+                />
                 <Text className="font-pmedium text-gray-100 mx-1">
                   Admin Login
                 </Text>

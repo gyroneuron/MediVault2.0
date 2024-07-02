@@ -1,8 +1,11 @@
 import { View, Text, Image } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Tabs } from "expo-router";
+import { supabase } from "../../lib/supabase";
 
 const _layout = () => {
+
+
   const TabIcon = ({ color, focused, name, icon }) => {
     return (
       <View className="items-center justify-center">

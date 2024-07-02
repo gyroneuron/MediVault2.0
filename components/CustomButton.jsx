@@ -7,6 +7,7 @@ const CustomButton = ({
   textstyle,
   isLoading,
   handlePress,
+  iconColor,
   image,
   submittingStatus,
   buttonStyles
@@ -21,7 +22,7 @@ const CustomButton = ({
       {image ? (
         <Image
           source={image}
-          tintColor={"white"}
+          tintColor={iconColor}
           className="h-12 w-12 mx-5"
           resizeMode="contain"
         />

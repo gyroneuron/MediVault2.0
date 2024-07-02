@@ -13,17 +13,38 @@ module.exports = {
         primary: '#0D6EFD',
         light: {
           text: '#395886',
-          background: 'F0F3FA',
-          icon: '#687076',
+          background: '#EDEDED',
+          elevated: {
+            bg: '#F5F5F5',
+            buttonBlue: '0D6EFD',
+            buttonGray: '#EDEDED',
+            label: '#000000',
+            secondaryLabel: '##E0E0E0',
+          },
+          icon: '#0D6EFD',
         },
         gray: {
           100: "#CDCDE0",
         },
         dark: {
           text: '#ffffff',
-          background: '#001524',
-          icon: '#ffffff',
-          button: '#0D6EFD'
+          background: '#000000',
+          icon: '#0D6EFD',
+          button: '#0D6EFD',
+          elevated: {
+            bg: '#27272A',
+            lbl: '#ffffff',
+            secLbl: '#6c757d',
+            terLbl: '#343a40',
+            blue: '0D6EFD',
+            buttonGray: '#E0E0E0'
+          },
+          base: {
+            bg: '#000000',
+            lbl: '#ffffff',
+            secLbl: '#6c757d',
+            terLbl: '#343a40',
+          }
         },
         white: '#ffffff',
       }

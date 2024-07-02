@@ -16,6 +16,7 @@ import CustomButton from "../../components/CustomButton";
 import { router } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { supabase } from "../../lib/supabase";
+import secure from '../../secure.json'
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -39,7 +40,7 @@ const AdminLogin = () => {
         Alert.alert(error.message)
       } else if (data) {
         const userId = data.user.id;
-        if(userId !== process.env.ADMIN_ID){
+        if(userId !== secure.ADMIN_ID){
           Alert.alert('Access to this page is restricted to authorized administrators only. Please use the standard login page.')
         } else {
           Alert.alert('Success','Admin Logged in Successfully!')
