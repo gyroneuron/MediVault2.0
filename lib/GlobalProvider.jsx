@@ -27,6 +27,7 @@ export const GlobalProvider = ({ children }) => {
             data.session.user.user_metadata.fullName
           );
           // console.log("A session exists:", data.session.user);
+          await getUserDetails(data.session.user.id);
           setUserAuthInfo(data.session.user);
           setIsLoggedIn(true);
         }
@@ -35,26 +36,26 @@ export const GlobalProvider = ({ children }) => {
 
       //Listen for auth state Changes
       const { data: authListener } = supabase.auth.onAuthStateChange(
-        (event, session) => {
-          // console.log(event)
+        async(event, session) => {
+          console.log(event)
 
           if (event === "INITIAL_SESSION") {
             // handle initial session
             if (session) {
               setIsLoggedIn(true);
               setUserAuthInfo(session.user);
-              getUserDetails(session.user.id);
+              await getUserDetails(session.user.id);
             }
             setLoading(false);
           } else if (event === "SIGNED_IN") {
             // handle sign in event
-            getUserDetails(session.user.id);
+            await getUserDetails(session.user.id);
             setIsLoggedIn(true);
             setUserAuthInfo(session.user);
             setLoading(false);
           } else if (event === "SIGNED_OUT") {
             // handle sign out event
-            router.replace('/index');
+            router.replace('/');
             setIsLoggedIn(false);
             setUserAuthInfo(null);
             setLoading(false);

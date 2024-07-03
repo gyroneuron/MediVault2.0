@@ -19,6 +19,7 @@ import { router } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../lib/supabase";
+import * as ImagePicker from "expo-image-picker";
 
 const DoctorRegistration = () => {
   const [fullName, setFullName] = useState("");
@@ -43,7 +44,11 @@ const DoctorRegistration = () => {
   const [isIdPicked, setIsIdPicked] = useState(false);
   const [certificate, setCertificate] = useState(null);
   const [isCertificatePicked, setIsCertificatePicked] = useState(false);
-  const [certificateDoc, setCertificateDoc] = useState(null);
+  
+
+  const [publicIdUrl, setPublicIdUrl] = useState(null);
+  const [publicCertificateUrl, setPublicCertificateUrl] = useState(null);
+
 
   const handleDoctorRegister = async () => {
     if ((!fullName || !email || !password || confirmPassword!=password || !licenseNumber || !idDoc || !certificate)){
@@ -83,6 +88,58 @@ const DoctorRegistration = () => {
   }
 
 
+  const pickImage = async (setImageUri, setStatus) => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      if (!result.canceled) {
+        Alert.alert('File Picked Successfully', result.assets[0].uri)
+        setImageUri(result.assets[0].uri);
+        setStatus(true);
+      } else {
+        Alert.alert('You did not pickup any image');
+        setImageUri(null);
+        setStatus(false);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Failed to pick image.");
+    }
+  };
+
+  const uploadImage = async (uri, path, setPublicUrl) => {
+      try {
+        const response = await fetch(uri);
+      const blob = await response.blob();
+  
+      const { data, error } = await supabase.storage
+        .from("doctor-verification-docs")
+        .upload(path, blob);
+  
+      if (error) {
+        Alert.alert(error.name, error.message)
+      } else {
+        console.log('Image Uploaded to Supabase!');
+        const { data } = supabase.storage
+        .from("doctor-docs")
+        .getPublicUrl(path);
+
+        if(data){
+          console.log('Public Url Fetched Successfull');
+          setPublicUrl(data.publicUrl);
+        }
+      }
+      } catch (error) {
+        Alert.alert(error); 
+      }
+    };
+  
+
+
+
 
   //Picking Doctor Document
   const pickDoc = async (set, setStatus) => {
@@ -98,58 +155,25 @@ const DoctorRegistration = () => {
   //Validating Email
 
   useEffect(() => {
-    const validateEmail = (email) => {
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      return emailRegex.test(email);
-    };
-
+    const validateEmail = (email) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
     setIsValidEmail(validateEmail(email));
   }, [email]);
 
-  //Validating Full name
-
   useEffect(() => {
-    const validateFullName = (fullName) => {
-      const regex = /^[A-Za-z\s]+$/;
-
-      const minLength = 8;
-      const maxLength = 50;
-
-      return (
-        regex.test(fullName) &&
-        fullName.length >= minLength &&
-        fullName.length <= maxLength
-      );
-    };
-
+    const validateFullName = (name) => /^[A-Za-z\s]{8,50}$/.test(name);
     setIsValidName(validateFullName(fullName));
   }, [fullName]);
 
-  //Validating Password
   useEffect(() => {
-    const validatePassword = (password) => {
-      return password.length >= 8;
-    };
-
-    setIsValidPassword(validatePassword(password));
+    setIsValidPassword(password.length >= 8);
   }, [password]);
 
-  //Validating Confirm password
   useEffect(() => {
-    const validateConfirmPass = (confirmPassword) => {
-      return password === confirmPassword;
-    };
+    setIsValidConfirmPassword(password === confirmPassword);
+  }, [confirmPassword, password]);
 
-    setIsValidConfirmPassword(validateConfirmPass(confirmPassword));
-  }, [confirmPassword]);
-
-  //Validate License Number
   useEffect(() => {
-    const validateLicense = (licenseNumber) => {
-      return licenseNumber.length <= 10;
-    };
-
-    setIsValidLicenseNumber(validateLicense(licenseNumber));
+    setIsValidLicenseNumber(licenseNumber.length <= 10);
   }, [licenseNumber]);
 
   return (
@@ -323,7 +347,7 @@ const DoctorRegistration = () => {
                 {!isIdPicked ? (
                   <TouchableOpacity
                     className="flex-row h-14 items-center justify-start flex-1"
-                    onPress={() => pickDoc(setIdDoc, setIsIdPicked)}
+                    onPress={async () => await pickImage(setIdDoc, setIsIdPicked)}
                   >
                     <Ionicons
                       name="add-circle-outline"
@@ -351,8 +375,8 @@ const DoctorRegistration = () => {
                 {!isCertificatePicked ? (
                   <TouchableOpacity
                     className="flex-row h-14 items-center justify-end flex-[1]"
-                    onPress={() =>
-                      pickDoc(setCertificate, setIsCertificatePicked)
+                    onPress={async() =>
+                      await pickImage(setCertificate, setIsCertificatePicked)
                     }
                   >
                     <Ionicons

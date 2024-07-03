@@ -33,6 +33,13 @@
         {
           "iCloudContainerEnvironment": "Production"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The MediVault accesses your photos.",
+          "cameraPermission": "Allow MediVault to access your camera"
+        }
       ]
     ],
     "experiments": {

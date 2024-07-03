@@ -36,38 +36,38 @@ const PatientRegistration = () => {
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false);
 
-    const handleRegister = async () => {
-      try {
-        const { data, error: signupError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              fullName: fullName,
-            }
-          }
-        })
+  const handleRegister = async () => {
+    try {
+      const { data, error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            fullName: fullName,
+          },
+        },
+      });
 
-        if (signupError) {
-          console.log(signupError);
+      if (signupError) {
+        console.log(signupError);
+      } else {
+        const { error: userUploadError } = await supabase
+          .from("profiles")
+          .insert([
+            { id: data.user.id, full_name: fullName, email, role: "patient" },
+          ]);
+
+        if (userUploadError) {
+          console.log(userUploadError);
         } else {
-            const {error: userUploadError} = await supabase
-              .from('profiles')
-              .insert([{ id: data.user.id, full_name: fullName, email, role: "patient" }]);
-
-            if (userUploadError) {
-              console.log(userUploadError)
-            } else {
-              Alert.alert('Success', 'Signed up Successfully!!');
-              router.navigate('UserLogin')
-            }
+          Alert.alert("Success", "Signed up Successfully!!");
+          router.navigate("UserLogin");
         }
-          
-      } catch (error) {
-        console.log(error)
       }
-    };
-    
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     const validateEmail = (email) => {
@@ -123,41 +123,73 @@ const PatientRegistration = () => {
           className="w-full flex-1 h-full items-center justify-center"
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
+          {/*Header Section*/}
           <View className="flex-[0.25] w-full items-center justify-center">
-            {/* <Image
-              source={Logo}
-              resizeMode="contain"
-              className=" h-40 w-full self-center my-10"
-            /> */}
-            <Text className=" font-pbold text-center text-[#ffffff] text-2xl">
+            <Text className=" font-pbold text-[#ffffff] text-2xl">
               Patient Registration
             </Text>
           </View>
+          
 
+          {/*Input Field Section*/}
           <View className="flex-1 w-full">
-            <InputField type={'default'} value={fullName} setValue={setFullName} setTyping={setIsNameTyping} placedHolder={'Enter full name'} textColor={'grey'} styles={'border-dark-elevated-bg'} fieldTitle={'Full Name'}/>
+            <Text className={`text-white text-xs mt-4 mb-2 self-start`}>
+            {" "}
+              Full Name
+            </Text>
+            <View className="rounded-2xl border-2 h-14 flex-row w-full items-center justify-center border-dark-elevated-bg focus:bg-dark-elevated-bg">
+              <TextInput
+                className="w-full h-full text-base px-4 text-dark-icon focus:text-white"
+                value={fullName}
+                onChangeText={(text) => {
+                  setFullName(text);
+                  setIsNameTyping(true);
+                }}
+                // placeholder={"Enter full name"}
+                placeholderTextColor={"gray"}
+                keyboardType={"default"}
+                cursorColor={"#FF8E01"}
+              />
+            </View>
             {!isValidName && isNameTyping ? (
-              <Text className="text-red-600 m-2 self-start">
+              <Text className="text-red-600 m-2 self-start text-xs">
                 Please enter minimum 6 characters
               </Text>
             ) : null}
-            <InputField type={'email'} value={email} setValue={setEmail} setTyping={setIsEmailTyping} placedHolder={'Enter email'} textColor={'grey'} styles={'border-dark-elevated-bg'} fieldTitle={'Email'}/>
-            
+            <Text className={`text-white text-sm mt-4 mb-2 self-start`}>{" "} Email</Text>
+            <View className="rounded-2xl border-2 h-14 flex-row w-full items-center justify-center border-dark-elevated-bg focus:bg-dark-elevated-bg">
+              <TextInput
+                className="w-full h-full text-base px-4 text-dark-icon focus:text-white"
+                value={email}
+                onChangeText={(text) => {
+                  setEmail(text);
+                  setIsEmailTyping(true);
+                }}
+                // placeholder={"Enter email"}
+                placeholderTextColor={"gray"}
+                keyboardType={"default"}
+                cursorColor={"#FF8E01"}
+              />
+            </View>
+
             {!isValidEmail && isemailtyping ? (
-              <Text className="text-red-600 m-2 self-start">
+              <Text className="text-red-600 m-2 self-start text-xs">
                 invalid email: must include @domain.com/.in
               </Text>
             ) : null}
-            
-            <View className="rounded-2xl border-slate-800 flex-row bg-slate-800 h-16 w-full items-center justify-evenly focus:border-[#0D6EFD]">
+            <Text className={`text-white text-sm mt-4 mb-2 self-start`}>
+            {" "}
+              Password
+            </Text>
+            <View className="rounded-2xl border-2 h-14 flex-row w-full items-center justify-center border-dark-elevated-bg focus:bg-dark-elevated-bg">
               <TextInput
-                className="w-[90%] h-full text-base px-4 text-[#E7DECD]"
+                className="w-[90%] h-full text-base px-4 text-dark-icon focus:text-white"
                 value={password}
                 onChangeText={(text) => {
                   setPassword(text);
                   setIsPasswordTyping(true);
                 }}
-                placeholder="Enter password"
+                // placeholder="Enter password"
                 placeholderTextColor={"grey"}
                 keyboardType="default"
                 cursorColor={"#FF8E01"}
@@ -180,22 +212,23 @@ const PatientRegistration = () => {
               )}
             </View>
             {!isvalidPassword && ispasswordtyping ? (
-              <Text className="text-red-600 m-2 self-start">
+              <Text className="text-red-600 m-2 self-start text-xs">
                 Please enter Valid Password
               </Text>
             ) : null}
-            <Text className="text-white self-start text-base my-3">
+            <Text className={`text-white text-sm mt-4 mb-2 self-start`}>
+              {" "}
               Confirm Password
             </Text>
-            <View className="rounded-2xl border-slate-800 flex-row bg-slate-800 h-16 w-full items-center justify-evenly focus:border-[#0D6EFD]">
+            <View className="rounded-2xl border-2 h-14 flex-row w-full items-center justify-center border-dark-elevated-bg focus:bg-dark-elevated-bg">
               <TextInput
-                className="w-[90%] h-full text-base px-4 text-[#E7DECD]"
+                className="w-[90%] h-full text-base px-4 text-dark-icon focus:text-white"
                 value={confirmPassword}
                 onChangeText={(text) => {
                   setConfirmPassword(text);
                   setIsConfirmPassTyping(true);
                 }}
-                placeholder="Enter confirm password"
+                // placeholder="Enter confirm password"
                 placeholderTextColor={"grey"}
                 keyboardType="default"
                 cursorColor={"#FF8E01"}
@@ -222,7 +255,7 @@ const PatientRegistration = () => {
               )}
             </View>
             {!isValidconfirmPassword && isConfirmPassTyping ? (
-              <Text className="text-red-600 m-2 self-start">
+              <Text className="text-red-600 m-2 self-start text-xs">
                 Please match with Password
               </Text>
             ) : null}
@@ -273,3 +306,65 @@ export default PatientRegistration;
 // } catch (error) {
 // console.log(error)
 // }
+
+
+// const InputField = ({
+//   label,
+//   value,
+//   onChangeText,
+//   isValid,
+//   isTyping,
+//   errorMessage,
+//   secureTextEntry,
+//   toggleSecureTextEntry,
+// }) => (
+//   <View className="flex-col mb-6">
+//     <Text className="font-pmedium text-dark-elevated-secLbl">{label}</Text>
+//     <View className="rounded-2xl bg-light-elevated-bg dark:bg-dark-elevated-bg border-2 h-14 w-full items-center flex-row justify-center focus:border-[#0D6EFD]">
+//       <TextInput
+//         className="w-[90%] h-full text-base px-1 text-dark-icon"
+//         value={value}
+//         onChangeText={onChangeText}
+//         secureTextEntry={secureTextEntry}
+//       />
+//       {toggleSecureTextEntry && (
+//         <TouchableOpacity onPress={toggleSecureTextEntry}>
+//           <Ionicons name={secureTextEntry ? "eye-off" : "eye"} size={20} />
+//         </TouchableOpacity>
+//       )}
+//     </View>
+//     {!isValid && isTyping && (
+//       <Text className="text-red-600 text-xs font-pregular m-2 self-start">
+//         {errorMessage}
+//       </Text>
+//     )}
+//   </View>
+// );
+
+// const DocumentPick = ({ label, isPicked, onPick, onRemove }) => (
+//   <View className="w-[48%] items-center justify-center">
+//     {!isPicked ? (
+//       <TouchableOpacity
+//         className="w-full items-center justify-center rounded-3xl h-14 my-2"
+//         onPress={onPick}
+//       >
+//         <Ionicons name="add-circle-outline" color={"#0D6EFD"} size={24} />
+//         <Text className=" text-medium text-black dark:text-white text-sm text-center mx-2">
+//           Upload {label}
+//         </Text>
+//       </TouchableOpacity>
+//     ) : (
+//       <View className="flex-row">
+//         <TouchableOpacity
+//           onPress={onRemove}
+//           className="w-full items-center justify-center border-green-600 border-2 rounded-3xl h-14 my-2"
+//         >
+//           <Ionicons name="cloud-done" color={"#ffffff"} size={24} />
+//           <Text className=" text-medium text-black dark:text-white text-sm mx-2">
+//             {label} Selected
+//           </Text>
+//         </TouchableOpacity>
+//       </View>
+//     )}
+//   </View>
+// );
