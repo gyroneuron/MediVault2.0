@@ -16,7 +16,7 @@ const _layout = () => {
     "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
   });
 
-  useEffect(() => {
+  useEffect(() => {``
     if (error) throw new Error(error);
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded, error]);
@@ -24,7 +24,9 @@ const _layout = () => {
   if (!fontsLoaded && !error) return null;
   return (
     <GlobalProvider>
-      <Stack screenOptions={{
+      <Stack 
+      initialRouteName="(tabs)/profile"
+      screenOptions={{
         headerShown: false
       }}>
         <Stack.Screen

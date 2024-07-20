@@ -1,12 +1,14 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import { View, Text, SafeAreaView} from "react-native";
+import React from "react";
 
 const search = () => {
   return (
-    <View>
-      <Text>search</Text>
-    </View>
-  )
-}
+    <SafeAreaView className="flex-1 h-full w-full bg-dark-background items-center justify-center">
+      <Text className="text-lg font-pmedium text-light-icon">
+        Search Screen
+      </Text>
+    </SafeAreaView>
+  );
+};
 
-export default search
+export default search;

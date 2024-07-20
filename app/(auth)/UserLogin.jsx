@@ -15,52 +15,26 @@ import Logo from "../../assets/images/Auth/Registration.png";
 import CustomButton from "../../components/CustomButton";
 import { router } from "expo-router";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { supabase } from "../../lib/supabase";
+import { useGlobalContext } from "../../lib/GlobalProvider";
 
 const UserLogin = () => {
+
+  const { Login, loading  } = useGlobalContext();
+
   const [email, setEmail] = useState("");
   const [isValidEmail, setIsValidEmail] = useState(true);
   const [isemailtyping, setIsEmailTyping] = useState(false);
   const [password, setPassword] = useState("");
   const [isvalidPassword, setIsValidPassword] = useState(true);
   const [ispasswordtyping, setIsPasswordTyping] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   const handleLogin = async () => {
-    try {
       if (!email || !password) {
         Alert.alert("Error", "Please fill in all the fields");
+        return;
       }
-      setIsSubmitting(true);
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        Alert.alert(error.name, error.message);
-      } else {
-        const { data: profile, error: profileFetchError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", data.user.id)
-          .single();
-
-        if (profileFetchError) {
-          Alert.alert(profileFetchError.message);
-        } else {
-          router.replace({
-            pathname: "/(tabs)/home",
-            params: profile,
-          });
-        }
-      }
-    } catch (error) {
-      console.log("Error:", error);
-    }
+      await Login(email, password);
   };
 
   useEffect(() => {
@@ -97,10 +71,10 @@ const UserLogin = () => {
           </View>
 
           <View className="flex-[1.2] w-full bg-[#27272A] p-3 rounded-3xl">
-            <Text className=" font-pbold text-center text-dark-elevatedCard-label text-2xl my-3">
+            <Text className=" font-pbold text-center text-dark-elevated-lbl text-2xl my-3">
               Login
             </Text>
-            <Text className="text-dark-elevatedCard-label text-base my-3 self-start">Email</Text>
+            <Text className="text-white self-start text-base my-3">Email</Text>
             <View className="rounded-2xl  border-2 border-zinc-700 bg-zinc-700 h-16 w-full items-center justify-center focus:border-zinc-300">
               <TextInput
                 className="w-full h-full text-base px-4 text-[#ffffff]"
@@ -158,6 +132,7 @@ const UserLogin = () => {
               name={"Log In"}
               handlePress={handleLogin}
               textstyle={"font-pbold text-base text-white"}
+              submittingStatus={loading}
             />
             <View className="items-center justify-center flex-row">
               <TouchableOpacity

@@ -6,7 +6,7 @@ import HomeDashboard from '../../dashboard/HomeDashboard';
 
 const home = () => {
   return(
-    <SafeAreaView className="w-full h-full bg-[#001524] items-center justify-center">
+    <SafeAreaView className="flex-1 h-full w-full bg-dark-background items-center justify-center">
       <HomeDashboard/>
     </SafeAreaView>
   );

@@ -14,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import Logo from "../../assets/images/Auth/admin-logo.png";
 import CustomButton from "../../components/CustomButton";
 import { router } from "expo-router";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { supabase } from "../../lib/supabase";
 import secure from '../../secure.json'
 
@@ -26,11 +26,17 @@ const AdminLogin = () => {
   const [isvalidPassword, setIsValidPassword] = useState(true);
   const [ispasswordtyping, setIsPasswordTyping] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   const handleLogin = async () => {
+
+    if (!email || !password) {
+      Alert.alert("Error", "Please fill in all the fields");
+      return;
+    }
+    
     try {
+      setIsSubmitting(true);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -52,6 +58,8 @@ const AdminLogin = () => {
       }
     } catch (error) {
       console.log('Error:', error)
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -151,6 +159,7 @@ const AdminLogin = () => {
               name={"Log In"}
               handlePress={handleLogin}
               textstyle={"font-pbold text-base text-white"}
+              submittingStatus={isSubmitting}
             />
           </View>
         </KeyboardAvoidingView>

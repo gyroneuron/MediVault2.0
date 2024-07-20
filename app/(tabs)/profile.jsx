@@ -1,13 +1,14 @@
-import { View, Text, Image, ScrollView, Alert } from "react-native";
+import { View, Text, Image, ScrollView, Alert, ActivityIndicator } from "react-native";
 import React from "react";
 import { useGlobalContext } from "../../lib/GlobalProvider";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ProfilePic from "../../assets/icons/profile-avatar.png";
 import CustomButton from "../../components/CustomButton";
 import { supabase } from "../../lib/supabase";
+import { router } from "expo-router";
 
 const profile = () => {
-  const { userDetails, loading, userRole, isLoggedIn } = useGlobalContext();
+  const { userDetails, loading, isLoggedIn } = useGlobalContext();
 
   const handleLogout = async () => {
     try {
@@ -15,18 +16,30 @@ const profile = () => {
 
       if(error){
         Alert.alert('Error during Signout', error)
+      } else {
+        router.replace('/(auth)/UserLogin');
+        router.back(false);
       }
     } catch (error) {
-      console.log(error)
+      Alert.alert(error);
     }
   }
 
-  // console.log(userDetails.role);
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 h-full w-full bg-dark-background items-center justify-center space-y-3">
+        <ActivityIndicator color={'yellow'} size={'small'}/>
+        <Text className="text-lg font-pmedium text-stone-700">Please Wait...</Text>
+      </SafeAreaView>
+    )
+  }
 
   return (
     <SafeAreaView className="flex-1 h-full w-full bg-dark-background items-center justify-center">
       <ScrollView className="flex-1 h-full w-[90%] bg-dark-background">
-        <View className="h-full w-full flex-1 p-2 items-center justify-center">
+        {
+          userDetails ? (
+            <View className="h-full w-full flex-1 p-2 items-center justify-center">
           <Image
             source={ProfilePic}
             resizeMode="contain"
@@ -54,8 +67,12 @@ const profile = () => {
               </View>
             ) : null}
           </View>
-          <CustomButton name={'Logout'} handlePress={handleLogout} textstyle={'font-pbold text-white'}/>
+          <CustomButton name={'Logout'} handlePress={handleLogout} textstyle={'font-pbold text-white'} submittingStatus={loading}/>
         </View>
+          ) : (
+            <Text className="text-center text-lg font-pmedium text-dark-elevated-lbl">Login to view Profile</Text>
+          )
+        }
       </ScrollView>
     </SafeAreaView>
   );

@@ -37,7 +37,14 @@ const PatientRegistration = () => {
     useState(false);
 
   const handleRegister = async () => {
+
+    if(!fullName || !email || !password || !confirmPassword) {
+      Alert.alert("Enter all the fields to register");
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
       const { data, error: signupError } = await supabase.auth.signUp({
         email,
         password,
@@ -66,6 +73,8 @@ const PatientRegistration = () => {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

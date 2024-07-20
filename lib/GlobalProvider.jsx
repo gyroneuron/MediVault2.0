@@ -6,33 +6,28 @@ import { router } from "expo-router";
 const GlobalContext = createContext();
 
 export const GlobalProvider = ({ children }) => {
-  const [userAuthInfo, setUserAuthInfo] = useState([]);
   const [userDetails, setUserDetails] = useState([])
-  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      //Checking for existing session
-      const { data, error: fetchSessionError } =
-        await supabase.auth.getSession();
+      // Checking for existing user
 
-      if (fetchSessionError) {
-        Alert.alert(fetchSessionError.name, fetchSessionError.message);
-      } else {
-        if (data.session) {
-          console.log(
-            "A session exists for User:",
-            data.session.user.user_metadata.fullName
-          );
-          // console.log("A session exists:", data.session.user);
-          await getUserDetails(data.session.user.id);
-          setUserAuthInfo(data.session.user);
+      try {
+        setLoading(true);
+        const { data: { user }} = await supabase.auth.getUser();
+        
+        if (user) {
           setIsLoggedIn(true);
+          await fetchProfile(user.id);
         }
+      } catch (error) {
+        Alert.alert("Unexpected Error occured!", error);
+      } finally {
         setLoading(false);
       }
+
 
       //Listen for auth state Changes
       const { data: authListener } = supabase.auth.onAuthStateChange(
@@ -41,37 +36,36 @@ export const GlobalProvider = ({ children }) => {
 
           if (event === "INITIAL_SESSION") {
             // handle initial session
+            setLoading(true);
             if (session) {
               setIsLoggedIn(true);
-              setUserAuthInfo(session.user);
-              await getUserDetails(session.user.id);
+              await fetchProfile(session.user.id);
             }
             setLoading(false);
           } else if (event === "SIGNED_IN") {
             // handle sign in event
-            await getUserDetails(session.user.id);
-            setIsLoggedIn(true);
-            setUserAuthInfo(session.user);
+            // await getUserDetails(session.user.id);
+            setLoading(true);
+            await fetchProfile(session.user.id);
             setLoading(false);
           } else if (event === "SIGNED_OUT") {
             // handle sign out event
-            router.replace('/');
+            setLoading(true);
+            setUserDetails(null);
             setIsLoggedIn(false);
-            setUserAuthInfo(null);
             setLoading(false);
 
           } else if (event === "PASSWORD_RECOVERY") {
             // handle password recovery event
-            console.log('Password recovery event');
             router.navigate('/(auth)/ForgotPassword')
           } else if (event === "TOKEN_REFRESHED") {
             // handle token refreshed event
-            setUserAuthInfo(session.user);
-            console.log('Token refreshed');
           } else if (event === "USER_UPDATED") {
             // handle user updated event
-            setUserAuthInfo(session.user);
-            console.log('User updated:');
+            setLoading(true);
+            await fetchProfile(true);
+            setIsLoggedIn(true);
+            setLoading(false);
           }
         }
       );
@@ -84,8 +78,9 @@ export const GlobalProvider = ({ children }) => {
     initializeAuth();
   }, []);
 
-  const getUserDetails = async (userId) => {
+  const fetchProfile = async (userId) => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from("profiles")
         .select()
@@ -94,23 +89,50 @@ export const GlobalProvider = ({ children }) => {
 
       if (error) {
         console.error("Error fetching user Info:", error);
-        // router.navigate("/(auth)/UserSelection");
+        setUserDetails(null);
+        setIsLoggedIn(false);
       } else {
         setUserDetails(data);
       }
     } catch (error) {
-      console.log(error);
+      Alert.alert(error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  const Login = async (email, password) => {
+    try {
+      setLoading(true);
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+    
+          if (error) {
+            Alert.alert(error.name, error.message);
+            console.log('Login Error SS');
+            setIsLoggedIn(false);
+          } else {
+            setIsLoggedIn(true);
+            router.replace({ pathname: "/(tabs)/home"});
+            return data;
+          }
+    } catch (error) {
+        return error;
+    } finally {
+      setLoading(false);
+    }
+}
 
   return (
     <GlobalContext.Provider
       value={{
-        userAuthInfo,
         userDetails,
         loading,
         isLoggedIn,
-        userRole,
+        fetchProfile,
+        Login,
       }}
     >
       {children}

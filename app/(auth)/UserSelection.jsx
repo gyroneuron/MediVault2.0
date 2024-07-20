@@ -5,19 +5,14 @@ import {
     Text,
     View,
   } from "react-native";
-  import React, { useEffect, useState } from "react";
+  import React, { useState } from "react";
   import Logo from "../../assets/images/Auth/doctor-talking-patient.png";
   import CustomButton from "../../components/CustomButton";
   import PatientIcon from '../../assets/icons/patient-icon.png'
   import DoctorIcon from '../../assets/icons/doctor.png'
   import { router } from "expo-router";
-  import { useColorScheme } from "nativewind";
   
   const UserSelection = () => {
-
-    const { colorScheme, setColorScheme } = useColorScheme('system');
-
-    const [user, setUser] = useState('');
   
     const handlePatient = async () => {
       router.navigate('/PatientRegistration')

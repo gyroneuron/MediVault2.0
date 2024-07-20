@@ -9,17 +9,17 @@ import {
   Platform,
   TouchableOpacity,
   Alert,
-  Button,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import React, { useEffect, useState } from "react";
-import Logo from "../../assets/images/Auth/Registration.png";
-import CustomButton from "../../components/CustomButton";
-import { router } from "expo-router";
-import * as DocumentPicker from "expo-document-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { supabase } from "../../lib/supabase";
 import * as ImagePicker from "expo-image-picker";
+import CustomButton from "../../components/CustomButton";
+import { router } from "expo-router";
+import * as FileSystem from 'expo-file-system';
+import { decode } from "base64-arraybuffer";
 
 const DoctorRegistration = () => {
   const [fullName, setFullName] = useState("");
@@ -27,12 +27,12 @@ const DoctorRegistration = () => {
   const [isNameTyping, setIsNameTyping] = useState(false);
   const [email, setEmail] = useState("");
   const [isValidEmail, setIsValidEmail] = useState(true);
-  const [isemailtyping, setIsEmailTyping] = useState(false);
+  const [isEmailTyping, setIsEmailTyping] = useState(false);
   const [password, setPassword] = useState("");
-  const [isvalidPassword, setIsValidPassword] = useState(true);
-  const [ispasswordtyping, setIsPasswordTyping] = useState(false);
+  const [isValidPassword, setIsValidPassword] = useState(true);
+  const [isPasswordTyping, setIsPasswordTyping] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [isValidconfirmPassword, setIsValidConfirmPassword] = useState(true);
+  const [isValidConfirmPassword, setIsValidConfirmPassword] = useState(true);
   const [isConfirmPassTyping, setIsConfirmPassTyping] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
@@ -44,52 +44,87 @@ const DoctorRegistration = () => {
   const [isIdPicked, setIsIdPicked] = useState(false);
   const [certificate, setCertificate] = useState(null);
   const [isCertificatePicked, setIsCertificatePicked] = useState(false);
-  
-
-  const [publicIdUrl, setPublicIdUrl] = useState(null);
-  const [publicCertificateUrl, setPublicCertificateUrl] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   const handleDoctorRegister = async () => {
-    if ((!fullName || !email || !password || confirmPassword!=password || !licenseNumber || !idDoc || !certificate)){
-      Alert.alert('Enter all the field to register');
-      return
+    if (
+      !fullName ||
+      !email ||
+      !password ||
+      confirmPassword !== password ||
+      !licenseNumber ||
+      !idDoc ||
+      !certificate
+    ) {
+      Alert.alert("Enter all the fields to register");
+      return;
     }
-    
+
     try {
+      setIsSubmitting(true);
       const { data, error: signupError } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             fullName: fullName,
-          }
-        }
-      })
+          },
+        },
+      });
 
       if (signupError) {
-        console.log(signupError);
+        console.error("Signup Error:", signupError);
+        Alert.alert("Signup Error", signupError.message);
       } else {
-          const {error: userUploadError} = await supabase
-            .from('profiles')
-            .insert([{ id: data.user.id, full_name: fullName, email, role: "doctor", id_url: idDoc, license: licenseNumber, certificate_url: certificate }]);
+        const userId = data.user.id;
 
-          if (userUploadError) {
-            console.log(userUploadError)
-          } else {
-            Alert.alert('Success', 'Signed up Successfully!!');
-            router.navigate('UserLogin')
-          }
+        const idUrlPath = `${userId}/id-${Date.now()}.png`;
+        const certificateUrlPath = `${userId}/certificate-${Date.now()}.png`;
+
+        const [idPublicUrl, certificatePublicUrl] = await Promise.all([
+          uploadImage(idDoc, idUrlPath),
+          uploadImage(certificate, certificateUrlPath),
+        ]);
+
+        if (!idPublicUrl || !certificatePublicUrl) {
+          Alert.alert("Upload Error", "Failed to upload documents.");
+          return;
+        }
+
+        const { error: userUploadError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: userId,
+              full_name: fullName,
+              email,
+              role: "doctor",
+              id_url: idPublicUrl,
+              license: licenseNumber,
+              certificate_url: certificatePublicUrl,
+            },
+          ]);
+
+        if (userUploadError) {
+          console.error("User Upload Error:", userUploadError);
+          Alert.alert("User Upload Error", userUploadError.message);
+        } else {
+          Alert.alert("Success", "Signed up Successfully!!");
+          router.navigate("UserLogin");
+        }
       }
-        
     } catch (error) {
-      console.log(error)
+      console.error("Registration Error:", error);
+      Alert.alert("Registration Error", error.message);
+    } finally {
+      setIsSubmitting(false);
     }
-  }
-
+  };
 
   const pickImage = async (setImageUri, setStatus) => {
     try {
+      setIsSubmitting(true);
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
@@ -97,65 +132,68 @@ const DoctorRegistration = () => {
       });
 
       if (!result.canceled) {
-        Alert.alert('File Picked Successfully', result.assets[0].uri)
+        Alert.alert("File Picked Successfully", result.assets[0].uri);
+        console.log("Picked Image URI:", result.assets[0].uri);
         setImageUri(result.assets[0].uri);
         setStatus(true);
       } else {
-        Alert.alert('You did not pickup any image');
+        Alert.alert("You did not pick any image");
         setImageUri(null);
         setStatus(false);
       }
     } catch (error) {
+      console.error("Image Pick Error:", error);
       Alert.alert("Error", "Failed to pick image.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  const uploadImage = async (uri, path, setPublicUrl) => {
-      try {
-        const response = await fetch(uri);
-      const blob = await response.blob();
-  
+  const uploadImage = async (uri, path) => {
+    try {
+      setIsSubmitting(true);
+
+      const base64 = await FileSystem.readAsStringAsync(uri, {
+        encoding: 'base64'
+      })
+
       const { data, error } = await supabase.storage
         .from("doctor-verification-docs")
-        .upload(path, blob);
-  
-      if (error) {
-        Alert.alert(error.name, error.message)
-      } else {
-        console.log('Image Uploaded to Supabase!');
-        const { data } = supabase.storage
-        .from("doctor-docs")
-        .getPublicUrl(path);
+        .upload(path, decode(base64), {
+          contentType: 'image/png'
+        });
 
-        if(data){
-          console.log('Public Url Fetched Successfull');
-          setPublicUrl(data.publicUrl);
+      if (error) {
+        console.error("Upload Error:", error);
+        Alert.alert("Upload Error", error.message);
+        return null;
+      } else {
+        console.log("Image Uploaded to Supabase!");
+        const { data: publicData } = supabase.storage
+          .from("doctor-verification-docs")
+          .getPublicUrl(path);
+
+        if (publicData) {
+          console.log("Public URL Fetched Successfully:", publicData.publicUrl);
+          return publicData.publicUrl;
+        } else {
+          console.error("Error fetching public URL");
+          Alert.alert("Error", "Failed to fetch public URL.");
+          return null;
         }
       }
-      } catch (error) {
-        Alert.alert(error); 
-      }
-    };
-  
-
-
-
-
-  //Picking Doctor Document
-  const pickDoc = async (set, setStatus) => {
-    try {
-      const file = await DocumentPicker.getDocumentAsync({});
-      set(file.assets[0].uri);
-      setStatus(true);
     } catch (error) {
-      throw new Error();
+      console.error("Upload Image Error:", error);
+      Alert.alert("Upload Image Error", error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  //Validating Email
-
+  // Validating Email
   useEffect(() => {
-    const validateEmail = (email) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+    const validateEmail = (email) =>
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
     setIsValidEmail(validateEmail(email));
   }, [email]);
 
@@ -236,11 +274,33 @@ const DoctorRegistration = () => {
                   cursorColor={"#FF8E01"}
                 />
               </View>
-              {!isValidEmail && isemailtyping ? (
+              {!isValidEmail && isEmailTyping ? (
                 <Text className="text-red-600 font-pregular m-2 self-start">
                   Please enter Valid Email
                 </Text>
               ) : null}
+              <Text className="text-white text-base my-3 font-medium self-start">
+                License Number
+              </Text>
+              <View className="rounded-2xl border-slate-800 bg-slate-800 h-14 w-full items-start justify-center focus:border-[#0D6EFD]">
+                <TextInput
+                  className="w-[90%] h-full text-base px-4 text-[#E7DECD]"
+                  value={licenseNumber}
+                  placeholder="Enter license number"
+                  placeholderTextColor={"grey"}
+                  onChangeText={(text) => {
+                    setLicenseNumber(text);
+                    setIsLicenseTyping(true);
+                  }}
+                  keyboardType={"default"}
+                />
+              </View>
+              {!isValidLicenseNumber && isLicenseTyping ? (
+                <Text className="text-red-600 font-pregular m-2 self-start">
+                  Max length 10
+                </Text>
+              ) : null}
+
               <Text className="text-white font-pmedium self-start text-base my-3">
                 Password
               </Text>
@@ -274,7 +334,7 @@ const DoctorRegistration = () => {
                   </TouchableOpacity>
                 )}
               </View>
-              {!isvalidPassword && ispasswordtyping ? (
+              {!isValidPassword && isPasswordTyping ? (
                 <Text className="text-red-600 font-pregular m-2 self-start">
                   Please enter Valid Password
                 </Text>
@@ -316,97 +376,56 @@ const DoctorRegistration = () => {
                   </TouchableOpacity>
                 )}
               </View>
-              {!isValidconfirmPassword && isConfirmPassTyping ? (
+              {!isValidConfirmPassword && isConfirmPassTyping ? (
                 <Text className="text-red-600 font-pregular m-2 self-start">
                   Please match with Password
                 </Text>
               ) : null}
 
-              <Text className="text-white text-base my-3 font-medium self-start">
-                License Number
+              <Text className="text-white text-base font-pmedium my-3 self-start">
+                Upload your License ID
               </Text>
-              <View className="rounded-2xl border-slate-800 bg-slate-800 h-14 w-full items-start justify-center focus:border-[#0D6EFD]">
-                <TextInput
-                  className="w-[90%] h-full text-base px-4 text-[#E7DECD]"
-                  value={licenseNumber}
-                  placeholder="Enter license number"
-                  placeholderTextColor={"grey"}
-                  onChangeText={(text) => {
-                    setLicenseNumber(text);
-                    setIsLicenseTyping(true);
-                  }}
-                  keyboardType={"default"}
-                />
+              <View className="rounded-2xl border-2 border-slate-800 bg-slate-800 h-14 w-full flex-row items-center justify-between focus:border-[#0D6EFD]">
+                <TouchableOpacity
+                  className="w-full h-full items-center justify-center"
+                  onPress={() => pickImage(setIdDoc, setIsIdPicked)}
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color={"yellow"} size={"small"} />
+                  ) : (
+                    <Text className="text-[#ffffff] text-base">
+                      {idDoc ? "ID Picked Successfully" : "Pick your ID"}
+                    </Text>
+                  )}
+                </TouchableOpacity>
               </View>
-              {!isValidLicenseNumber && isLicenseTyping ? (
-                <Text className="text-red-600 font-pregular m-2 self-start">
-                  Max length 10
-                </Text>
-              ) : null}
-              <View className="w-full flex-row items-center justify-center">
-                {!isIdPicked ? (
-                  <TouchableOpacity
-                    className="flex-row h-14 items-center justify-start flex-1"
-                    onPress={async () => await pickImage(setIdDoc, setIsIdPicked)}
-                  >
-                    <Ionicons
-                      name="add-circle-outline"
-                      color={"#0D6EFD"}
-                      size={24}
-                    />
-                    <Text className=" text-medium text-white text-base text-center mx-2">
-                      Upload ID
+
+              <Text className="text-white text-base font-pmedium my-3 self-start">
+                Upload your License Certificate
+              </Text>
+              <View className="rounded-2xl border-2 border-slate-800 bg-slate-800 h-14 w-full flex-row items-center justify-between focus:border-[#0D6EFD]">
+                <TouchableOpacity
+                  className="w-full h-full items-center justify-center"
+                  onPress={() =>
+                    pickImage(setCertificate, setIsCertificatePicked)
+                  }
+                >
+                  {isSubmitting ? (
+                    <ActivityIndicator color={"yellow"} size={"small"} />
+                  ) : (
+                    <Text className="text-[#ffffff] text-base">
+                      {certificate
+                        ? "Certificate Picked Successfully"
+                        : "Pick your Certificate"}
                     </Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    className="flex-row h-14 items-center justify-start flex-1"
-                    onPress={() => {
-                      setIdDoc(null);
-                      setIsIdPicked(false);
-                    }}
-                  >
-                    <Ionicons name="cloud-done" color={"#ffffff"} size={24} />
-                    <Text className=" text-medium text-green-500 text-base text-center mx-2">
-                      Id Selected
-                    </Text>
-                  </TouchableOpacity>
-                )}
-                {!isCertificatePicked ? (
-                  <TouchableOpacity
-                    className="flex-row h-14 items-center justify-end flex-[1]"
-                    onPress={async() =>
-                      await pickImage(setCertificate, setIsCertificatePicked)
-                    }
-                  >
-                    <Ionicons
-                      name="add-circle-outline"
-                      color={"#0D6EFD"}
-                      size={24}
-                    />
-                    <Text className=" text-medium text-white text-base mx-2">
-                      Upload Certificate
-                    </Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity
-                    className="flex-row h-14 items-center justify-end flex-1"
-                    onPress={() => {
-                      setCertificate(null);
-                      setIsCertificatePicked(false);
-                    }}
-                  >
-                    <Ionicons name="cloud-done" color={"#ffffff"} size={24} />
-                    <Text className=" text-medium text-green-500 text-base text-center mx-2">
-                      Certificate Selected
-                    </Text>
-                  </TouchableOpacity>
-                )}
+                  )}
+                </TouchableOpacity>
               </View>
               <CustomButton
                 name={"Register"}
                 handlePress={handleDoctorRegister}
                 textstyle={"font-pbold text-base text-white"}
+                submittingStatus={isSubmitting}
               />
               <View className="items-center justify-center flex-row">
                 <Text className="font-pmedium text-light-text">

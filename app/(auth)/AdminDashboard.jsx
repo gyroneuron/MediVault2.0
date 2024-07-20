@@ -16,6 +16,7 @@ import NoData from '../../assets/images/Auth/no-data.png'
 
 const AdminDashboard = () => {
   const [doctors, setDoctors] = useState([]);
+  const [ isSubmitting, setIsSubmitting ] = useState(true);
   const [error, setError] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
@@ -37,16 +38,15 @@ const AdminDashboard = () => {
       .eq("verified", false);
 
     if (error) {
-      console.log("Error fetching users:", error);
-      setError(error.message);
+      Alert.alert("Error fetching users:", error);
     } else {
-      // console.log("Users fetched successfully:", data);
       setDoctors(data);
-    }
+    } 
   };
 
   const handleVerifyDoctor = async (doctorId, doctorName) => {
     try {
+      setIsSubmitting(true);
       const { data, error: VerifyingError } = await supabase
         .from("profiles")
         .update({ verified: true })
@@ -61,11 +61,14 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.log("Error during verification:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const DeleteDoctor = async (doctorID, doctorName) => {
     try {
+      setIsSubmitting(true);
       const { data, error: DeletingError } = await supabase
         .from("profiles")
         .delete()
@@ -90,6 +93,8 @@ const AdminDashboard = () => {
       }
     } catch (error) {
       console.log("Error during Deletion:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
