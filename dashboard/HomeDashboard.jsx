@@ -6,25 +6,27 @@ import PatientDashboard from '../dashboard/PatientDashboard';
 import DoctorDashboard from '../dashboard/PatientDashboard';
 
 const HomeDashboard = () => {
-  // const { user, loading, userRole, isLoggedIn } = useGlobalContext();
+  const { userDetails,
+    loading,
+    isLoggedIn, } = useGlobalContext();
 
-  // if (loading) {
-  //   return <ActivityIndicator color={"#0D6EFD"} size={"large"} />;
-  // }
+  if (loading) {
+    return <ActivityIndicator color={"#0D6EFD"} size={"large"} />;
+  }
 
-  // if (!isLoggedIn) {
-  //   return (
-  //     <Text className="self-center text-red-500">You are not logged in.</Text>
-  //   );
-  // }
+  if (!isLoggedIn) {
+    return (
+      <Text className="self-center text-red-500">You are not logged in.</Text>
+    );
+  }
 
-  // if (userRole === "patient") {
-  //   return <PatientDashboard/>
-  // } else if (userRole === "doctor") {
-  //   return <DoctorDashboard />;
-  // } else {
-  //   return <Text>Invalid user role.</Text>;
-  // }
+  if (userDetails.role === "patient") {
+    return <PatientDashboard/>
+  } else if (userRole === "doctor") {
+    return <DoctorDashboard />;
+  } else {
+    return <Text>Invalid user role.</Text>;
+  }
 };
 
 export default HomeDashboard;

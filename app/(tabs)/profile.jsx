@@ -8,20 +8,18 @@ import { supabase } from "../../lib/supabase";
 import { router } from "expo-router";
 
 const profile = () => {
-  const { userDetails, loading, isLoggedIn } = useGlobalContext();
+  const { userDetails, loading, isLoggedIn, logout } = useGlobalContext();
 
   const handleLogout = async () => {
     try {
       const { error } = await supabase.auth.signOut()
-
       if(error){
-        Alert.alert('Error during Signout', error)
+        Alert.alert('Logout Error', error.message);
       } else {
-        router.replace('/(auth)/UserLogin');
-        router.back(false);
+        router.navigate('UserSelection')
       }
     } catch (error) {
-      Alert.alert(error);
+      console.log(error);
     }
   }
 

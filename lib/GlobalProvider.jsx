@@ -101,6 +101,8 @@ export const GlobalProvider = ({ children }) => {
     }
   };
 
+  
+
   const Login = async (email, password) => {
     try {
       setLoading(true);
@@ -125,6 +127,24 @@ export const GlobalProvider = ({ children }) => {
     }
 }
 
+const Logout = async () => {
+  try {
+    setLoading(true);
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      Alert.alert("Logout Error", error.message);
+    } else {
+      setIsLoggedIn(false);
+      router.replace({ pathname: "/(auth)/login" });
+    }
+  } catch (error) {
+    Alert.alert("Unexpected Error occured!", error);
+  } finally {
+    setLoading(false);
+  }
+}
+
   return (
     <GlobalContext.Provider
       value={{
@@ -133,6 +153,7 @@ export const GlobalProvider = ({ children }) => {
         isLoggedIn,
         fetchProfile,
         Login,
+        Logout,
       }}
     >
       {children}
@@ -143,3 +164,25 @@ export const GlobalProvider = ({ children }) => {
 export const useGlobalContext = () => {
   return useContext(GlobalContext);
 };
+
+export async function fetchDocuments (userId, bucketName) {
+  try {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from(`${bucketName}`)
+      .select()
+      .eq("user_id", userId)
+
+    if (error) {
+      console.error("Error fetching user documents:", error);
+      setUserDetails(null);
+      setIsLoggedIn(false);
+    } else {
+      return data;
+    }
+  } catch (error) {
+    Alert.alert(error);
+  } finally {
+    setLoading(false);
+  }
+}

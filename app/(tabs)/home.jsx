@@ -1,15 +1,31 @@
-import { StatusBar } from 'react-native'
+import { Text, ActivityIndicator } from 'react-native'
 import React from 'react'
-import { SafeAreaView } from 'react-native-safe-area-context';
 import HomeDashboard from '../../dashboard/HomeDashboard';
+import { useGlobalContext } from '../../lib/GlobalProvider';
+import DoctorDashboard from '../../dashboard/DoctorDashBoard';
+import PatientDashboard from '../../dashboard/PatientDashboard';
 
 
 const home = () => {
-  return(
-    <SafeAreaView className="flex-1 h-full w-full bg-dark-background items-center justify-center">
-      <HomeDashboard/>
-    </SafeAreaView>
-  );
+
+  const { userDetails, loading, isLoggedIn } = useGlobalContext();
+  console.log(userDetails.role);
+
+  if (loading) {
+    return <ActivityIndicator color={"#0D6EFD"} size={"large"} />;
+  }
+
+  if (userDetails.role === "patient") {
+    return (
+    <PatientDashboard/>
+    )
+  } else if (userDetails.role === "doctor") {
+    return (
+      <DoctorDashboard/>
+    )
+  } else {
+    return <Text>Invalid user role.</Text>;
+  }
 }
 
 export default home

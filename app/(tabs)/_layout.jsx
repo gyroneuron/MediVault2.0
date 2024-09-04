@@ -63,7 +63,7 @@ const _layout = () => {
           tabBarIcon: ({ focused, color }) => (
             <TabIcon
               icon={require("../../assets/icons/search.png")}
-              name={"Create"}
+              name={"Search"}
               color={color}
               focused={focused}
             />
