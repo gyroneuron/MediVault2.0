@@ -9,7 +9,7 @@ import PatientDashboard from '../../dashboard/PatientDashboard';
 const home = () => {
 
   const { userDetails, loading, isLoggedIn } = useGlobalContext();
-  console.log(userDetails.role);
+  console.log(userDetails?.role);
 
   if (loading) {
     return <ActivityIndicator color={"#0D6EFD"} size={"large"} />;
