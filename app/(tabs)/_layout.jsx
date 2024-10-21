@@ -42,7 +42,7 @@ const _layout = () => {
       }}
     >
       <Tabs.Screen
-        name="home"
+        name="(home)"
         options={{
           headerShown: false,
           tabBarIcon: ({ focused, color }) => (
@@ -57,7 +57,7 @@ const _layout = () => {
       />
 
       <Tabs.Screen
-        name="search"
+        name="(search)"
         options={{
           headerShown: false,
           tabBarIcon: ({ focused, color }) => (
@@ -71,13 +71,13 @@ const _layout = () => {
         }}
       />
       <Tabs.Screen
-        name="upload"
+        name="(upload)"
         options={{
           headerShown: false,
           tabBarIcon: ({ focused, color }) => (
             <TabIcon
               icon={require("../../assets/icons/upload.png")}
-              name={"Saved"}
+              name={"Upload"}
               color={color}
               focused={focused}
             />
@@ -85,7 +85,7 @@ const _layout = () => {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="(profile)"
         options={{
           headerShown: false,
           tabBarIcon: ({ focused, color }) => (

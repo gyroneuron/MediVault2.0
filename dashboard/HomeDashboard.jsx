@@ -20,7 +20,7 @@ const HomeDashboard = () => {
     );
   }
 
-  if (userDetails.role === "patient") {
+  if (userDetails?.role === "patient") {
     return <PatientDashboard/>
   } else if (userRole === "doctor") {
     return <DoctorDashboard />;

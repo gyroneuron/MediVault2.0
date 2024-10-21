@@ -117,7 +117,7 @@ export const GlobalProvider = ({ children }) => {
             setIsLoggedIn(false);
           } else {
             setIsLoggedIn(true);
-            router.replace({ pathname: "/(tabs)/home"});
+            router.replace({ pathname: "/(tabs)/(home)"});
             return data;
           }
     } catch (error) {
@@ -136,7 +136,7 @@ const Logout = async () => {
       Alert.alert("Logout Error", error.message);
     } else {
       setIsLoggedIn(false);
-      router.replace({ pathname: "/(auth)/login" });
+      router.replace({ pathname: "/(auth)/UserLogin" });
     }
   } catch (error) {
     Alert.alert("Unexpected Error occured!", error);

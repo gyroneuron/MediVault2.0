@@ -7,7 +7,6 @@ import { GlobalProvider } from "../lib/GlobalProvider";
 SplashScreen.preventAutoHideAsync();
 
 const _layout = () => {
-  
 
   const [fontsLoaded, error] = useFonts({
     "Poppins-Medium": require("../assets/fonts/Poppins-Medium.ttf"),
@@ -16,7 +15,7 @@ const _layout = () => {
     "Poppins-Regular": require("../assets/fonts/Poppins-Regular.ttf"),
   });
 
-  useEffect(() => {``
+  useEffect(() => {
     if (error) throw new Error(error);
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded, error]);
@@ -25,7 +24,7 @@ const _layout = () => {
   return (
     <GlobalProvider>
       <Stack 
-      initialRouteName="(tabs)/profile"
+      initialRouteName="(tabs)"
       screenOptions={{
         headerShown: false
       }}>

@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Alert, ScrollView, SafeAreaView } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { RadioButton } from 'react-native-paper';
-import CustomButton from '../../components/CustomButton';
+import CustomButton from '../../../components/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import { decode } from "base64-arraybuffer";
-import { useGlobalContext } from '../../lib/GlobalProvider';
-import { supabase } from '../../lib/supabase';
+import { useGlobalContext } from '../../../lib/GlobalProvider';
+import { supabase } from '../../../lib/supabase';
 
 
-const DocumentUploadScreen = () => {
+const index = () => {
   const { userDetails, loading, isLoggedIn } = useGlobalContext();
 
   const [selectedDocument, setSelectedDocument] = useState(null);
@@ -170,4 +170,4 @@ const DocumentUploadScreen = () => {
   );
 };
 
-export default DocumentUploadScreen;
+export default index;

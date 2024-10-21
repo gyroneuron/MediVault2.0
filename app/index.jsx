@@ -9,7 +9,7 @@ const StartScreen = () => {
   
   if(isLoggedIn && !loading) {
     return(
-      <Redirect href={'/profile'}/>
+      <Redirect href={'(home)'}/>
     )
   }
 
