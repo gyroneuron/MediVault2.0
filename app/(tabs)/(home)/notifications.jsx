@@ -75,13 +75,13 @@ const notifications = () => {
         data={pendingRequests}
         keyExtractor={(item) => item.id}
         className="flex-1 w-[90%]"
-        // ListHeaderComponent={() => (
-        //   <View className="w-full mb-5">
-        //     <Text className="text-3xl font-pbold text-primary p-2">
-        //     Pending Requests
-        //   </Text>
-        //   </View>
-        // )}
+        ListHeaderComponent={() => (
+          <View className="w-full mb-5">
+            <Text className="text-3xl font-pbold text-primary p-2">
+            Pending Requests
+          </Text>
+          </View>
+        )}
         renderItem={({ item }) => (
           <View className="flex-1 p-2 items-center justify-center bg-light-elevated-bg rounded-2xl space-y-3">
             <Text className="text-lg font-pmedium text-light-elevated-label">
