@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Image,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
@@ -100,6 +101,13 @@ const PatientProfile = () => {
   return (
     <SafeAreaView className="flex-1 bg-white dark:bg-dark-background p-4 items-center justify-center">
       <View className="space-y-4 items-center justify-center w-full">
+        <View className="h-24 w-24 rounded-full items-center justify-center">
+          <Image
+            source={{ uri: profile.avatar }}
+            className="w-full h-full rounded-full"
+            resizeMode="cover"
+          />
+        </View>
         <Text className="text-2xl font-pbold">{profile.full_name}</Text>
         <Text className="text-lg text-gray-600 font-pregular">{profile.email}</Text>
         <Text className="text-lg text-primary font-pregular">{profile.role}</Text>

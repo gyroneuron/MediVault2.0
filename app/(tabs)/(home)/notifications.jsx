@@ -1,4 +1,4 @@
-import { View, Text, FlatList, Button, TouchableOpacity, StatusBar } from "react-native";
+import { View, Text, FlatList, Button, TouchableOpacity, StatusBar, Alert } from "react-native";
 import React from "react";
 import { useGlobalContext } from "../../../lib/GlobalProvider";
 import { supabase } from "../../../lib/supabase";
@@ -16,7 +16,7 @@ const notifications = () => {
       const { data, error } = await supabase
         .from("access_requests")
         .select("*")
-        .eq("patient_id", userDetails.id)
+        .eq("patient_id", userDetails?.id)
         .eq("status", "pending");
 
       if (error) {
@@ -42,20 +42,6 @@ const notifications = () => {
   
       if (requestError) {
         console.error('Error updating request status:', requestError);
-      }
-  
-      // Log the approval or denial in the `approvals` table
-      const { error: approvalError } = await supabase
-        .from('approvals')
-        .insert([
-          {
-            request_id: requestId,
-            approval_status: status,
-          },
-        ]);
-  
-      if (approvalError) {
-        console.error('Error logging approval/denial:', approvalError);
       } else {
         Alert.alert('Response sent', `The request has been ${status}.`);
       }

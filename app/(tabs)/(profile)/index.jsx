@@ -18,6 +18,7 @@ import { MaterialIcons, Octicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { decode } from "base64-arraybuffer";
+import MenuButton from "../../../components/MenuButton";
 
 const index = () => {
   const { userDetails, loading, isLoggedIn, Logout, fetchProfile } =
@@ -93,7 +94,10 @@ const index = () => {
           .eq("id", userDetails.id);
 
         if (uploadToProfileTableError) {
-          Alert.alert("Error Updating Profile", uploadToProfileTableError.message);
+          Alert.alert(
+            "Error Updating Profile",
+            uploadToProfileTableError.message
+          );
         }
 
         Alert.alert("Avatar Updated!");
@@ -238,7 +242,7 @@ const index = () => {
           </Text>
           {userDetails?.role === "doctor" ? (
             <View className="items-start justify-center my-2">
-              <Text className=" text-xs font-pmedium text-dark-elevated-lbl my-3">
+              {/* <Text className=" text-xs font-pmedium text-dark-elevated-lbl my-3">
                 Certificate:{" "}
                 <Text className="text-center text-xs font-pmedium text-dark-elevated-secLbl">
                   {userDetails?.certificate_url}
@@ -249,10 +253,15 @@ const index = () => {
                 <Text className="text-center text-xs font-pmedium text-dark-elevated-secLbl">
                   {userDetails?.id_url}
                 </Text>
-              </Text>
+              </Text> */}
             </View>
           ) : null}
         </View>
+        <MenuButton
+          name={"Your Certificates"}
+          Icon={<Octicons name="file-directory" size={24} color="white" />}
+          handlePress={() => {router.navigate("certificates"), console.log("certificates") }}
+        />
         <CustomButton
           name={"Logout"}
           handlePress={handleLogout}

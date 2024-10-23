@@ -7,6 +7,7 @@ import {
   Keyboard,
   FlatList,
   ActivityIndicator,
+  Image,
 } from "react-native";
 import React, { useState } from "react";
 import { FontAwesome, FontAwesome6 } from "@expo/vector-icons";
@@ -27,7 +28,7 @@ const DoctorSearch = () => {
     try {
       const { data, error } = await supabase
         .from("profiles")
-        .select("full_name, email, id, role")
+        .select("full_name, email, id, role, avatar")
         .ilike("full_name", `%${searchText}%`);
 
       if (error) {
@@ -98,8 +99,19 @@ const DoctorSearch = () => {
               onPress={() => handleProfileView(item?.id, item?.role)}
               className="flex-row items-center justify-between p-4 border-b border-gray-200 w-full"
             >
-              <Text className="text-lg font-semibold text-center">{item?.full_name}</Text>
-              <Text className="text-base text-gray-500">{item?.email}</Text>
+              <View className="flex-row items-center">
+                <View className="h-12 w-12 rounded-full items-center justify-center">
+                <Image
+                  source={{ uri: item?.avatar }}
+                  className="w-full h-full rounded-full"
+                  resizeMode="cover"
+                />
+                </View>
+                <View className="flex-col ml-4">
+                  <Text className="text-lg font-semibold">{item?.full_name}</Text>
+                  <Text className="text-base text-gray-500">{item?.email}</Text>
+                </View>
+              </View>
             </TouchableOpacity>
           )}
           ListEmptyComponent={() =>

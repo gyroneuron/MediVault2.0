@@ -24,7 +24,7 @@ const _layout = () => {
   return (
     <GlobalProvider>
       <Stack 
-      initialRouteName="(tabs)"
+      initialRouteName="(profile)"
       screenOptions={{
         headerShown: false
       }}>
