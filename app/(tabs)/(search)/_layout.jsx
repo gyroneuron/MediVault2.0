@@ -29,6 +29,24 @@ const _layout = () => {
           headerBackVisible: true,
         }}
       />
+      <Stack.Screen 
+        name="patient/document/ViewDocuments"
+        options={{
+          title: 'View Documents',
+          headerShown: true,
+          headerBackTitle: 'Back',
+          headerBackVisible: true,
+        }}
+      />
+      <Stack.Screen
+        name="patient/document/UploadByDoctor"
+        options={{
+          title: 'Upload Document',
+          headerShown: true,
+          headerBackTitle: 'Back',
+          headerBackVisible: true,
+        }}
+      />
     </Stack>
   )
 }

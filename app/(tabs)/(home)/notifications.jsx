@@ -44,6 +44,7 @@ const notifications = () => {
         console.error('Error updating request status:', requestError);
       } else {
         Alert.alert('Response sent', `The request has been ${status}.`);
+        fetchPendingRequests();
       }
     } catch (error) {
       console.error('Approval handling error:', error);

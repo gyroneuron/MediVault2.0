@@ -122,7 +122,7 @@ const DoctorSearch = () => {
             ) : (
               <View className="flex-1 items-center justify-center mt-5">
                 <Text className="text-lg font-semibold text-gray-500">
-                  No profiles found
+                  Search for a doctor or patient
                 </Text>
               </View>
             )

@@ -8,7 +8,7 @@ const SearchScreen = () => {
   const { userDetails, loading, isLoggedIn } = useGlobalContext();
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-dark-background">
+    <SafeAreaView className="flex-1 bg-white dark:bg-dark-background p-4">
       {
         userDetails?.role === "patient" ? (
           <PatientDashboard/>

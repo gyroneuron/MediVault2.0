@@ -53,7 +53,7 @@ const DoctorDashboard = () => {
         </View>
       </View>
 
-      <View className="flex-1 p-4 w-[90%] space-y-3">
+      <View className="flex-1 p-4 w-[90%] space-y-3 self-center">
         <View className="flex-row space-x-3">
           <TouchableOpacity
             onPress={() => router.navigate("/(tabs)/(search)")}
@@ -76,12 +76,12 @@ const DoctorDashboard = () => {
         </View>
         <View className="flex-row space-x-3">
           <TouchableOpacity
-            onPress={() => router.navigate("/(tabs)/(search)")}
+            onPress={() => router.replace("/(tabs)/(profile)")}
             className="flex-1 p-4 bg-white rounded-lg shadow items-center"
           >
-            <Ionicons name="search" size={36} color="blue" />
+            <Ionicons name="people" size={36} color="blue" />
             <Text className="text-lg font-semibold text-dark-button">
-              Search Patients
+              Your Requests
             </Text>
           </TouchableOpacity>
         </View>

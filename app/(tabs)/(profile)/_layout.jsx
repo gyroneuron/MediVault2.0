@@ -5,14 +5,20 @@ import { Stack } from "expo-router";
 const _layout = () => {
   return (
     <Stack
+      initialRouteName="index"
       screenOptions={{
         headerShown: false,
+        title: "Profile",
       }}
     >
       <Stack.Screen
         name="index"
-        screenOptions={{
-          headerShown: false,
+      />
+      <Stack.Screen 
+        name="requests" 
+        headerShown="true"
+        options={{
+          title: "Access Requests",
         }}
       />
       <Stack.Screen
@@ -21,7 +27,7 @@ const _layout = () => {
           headerShown: true,
           headerTitle: "Your Certificates",
           headerTitleStyle: {
-            FontFace: "Poppins-Bold"
+            FontFace: "Poppins-Bold",
           },
         }}
       />

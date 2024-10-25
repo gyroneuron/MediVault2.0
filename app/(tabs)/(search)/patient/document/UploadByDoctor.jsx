@@ -1,24 +1,40 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Alert, ScrollView, SafeAreaView } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, ScrollView, SafeAreaView, ActivityIndicator } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { RadioButton } from 'react-native-paper';
-import CustomButton from '../../../components/CustomButton';
+import CustomButton from '../../../../../components/CustomButton';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 import { decode } from "base64-arraybuffer";
-import { useGlobalContext } from '../../../lib/GlobalProvider';
-import { supabase } from '../../../lib/supabase';
+import { useGlobalContext } from '../../../../../lib/GlobalProvider';
+import { supabase } from '../../../../../lib/supabase';
+import { Redirect, router, useLocalSearchParams } from 'expo-router';
+import PatientProfile from '../[id]';
 
 
-const index = () => {
+const UploadByDoctor = () => {
   const { userDetails, loading, isLoggedIn } = useGlobalContext();
-
+  const { patient_id, patient_email} = useLocalSearchParams();
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [documentType, setDocumentType] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [documentPicked, setDocumentPicked] = useState(false);
 
+  if(!isLoggedIn){
+    <Redirect href="index" />
+  }
+
+  if(loading) {
+    return (
+      <SafeAreaView className="flex-1 h-full w-full bg-pink-50 items-center justify-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+        </SafeAreaView>
+    )
+  }
+
+
   const selectDocument = async () => {
+    setIsSubmitting(true);
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: 'application/pdf',
@@ -26,6 +42,7 @@ const index = () => {
       });
       if (!result.canceled) {
         setSelectedDocument(result);
+        console.log("Selected Document:", result);
       } else {
         setTimeout(() => {
           Alert.alert("No document selected", "Pick a document to upload.");
@@ -33,10 +50,18 @@ const index = () => {
       }
     } catch (error) {
       Alert.alert("Document picking error", error.message);
+    } finally{
+      setIsSubmitting(false);
     }
   };
 
-  const SaveDocumentToDatabase = async () => { 
+  //Check if Doctor has access
+  const checkAccess = async (patientId) => {
+    if (!userDetails) {
+      Alert.alert('Please login first', 'You need to be logged in to upload documents');
+      return;
+    }
+
     if (!selectedDocument) {
       Alert.alert("No document selected", "Please select a document to upload.");
       return;
@@ -47,9 +72,37 @@ const index = () => {
       return;
     }
 
-    const path = `${userDetails.email}/${documentType}/${new Date().toISOString()}/${selectedDocument.assets[0].name}`;
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase
+        .from('access_requests')
+        .select('*')
+        .eq('doctor_id', userDetails.id)
+        .eq('patient_id', patientId)
+        .single();
+
+        if (error) {
+          Alert.alert('Could not verify access rights', error.message);
+        } 
+
+        if (!data || data.status === 'pending' || data.status === 'rejected') {
+          Alert.alert('Access Denied', "You do not have access to this patient's documents");
+        }
+        await SaveDocumentToDatabase();
+    } catch (error) {
+      // console.error('Uncaught error in checkAccess:', error);
+      Alert.alert('Error', 'An unexpected error occurred');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const SaveDocumentToDatabase = async () => { 
+    
+
+    const path = `${patient_email}/${documentType}//${new Date().toISOString()}/${selectedDocument.assets[0].name}`;
     const publicUrl = await uploadDocument(selectedDocument.assets[0].uri, path);
-    console.log(publicUrl);
+    // console.log(publicUrl);
 
     if (publicUrl) {
       // Save the document to the database
@@ -58,7 +111,7 @@ const index = () => {
           .from('documents')
           .insert([
             {
-              user_id: userDetails.id,
+              user_id: patient_id,
               file_type: documentType,
               file_name: selectedDocument.assets[0].name,
               file_url: publicUrl,
@@ -161,7 +214,7 @@ const index = () => {
 
         <CustomButton
           name={"Upload Document"}
-          handlePress={SaveDocumentToDatabase}
+          handlePress={checkAccess}
           textstyle={"font-pbold text-base text-white"}
           submittingStatus={isSubmitting}
         />
@@ -170,4 +223,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default UploadByDoctor;
